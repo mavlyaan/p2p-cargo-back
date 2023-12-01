@@ -1,0 +1,56 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.buttons{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0px;
+}
+.buttons button{
+    padding: 10px 50px;
+    border-radius: 8px;
+}
+.add-content, .show-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.active{
+    background-color:blue;
+    color: #fff;
+}
+.show{
+    display: flex;
+}
+.hide{
+    display: none;
+}
+.filter{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.edit{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#track-codes div{
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.selected{
+    border: 1px solid red;
+    padding: 5px;
+}
+.track-code{
+    border-bottom: 1px solid black;
+}
+.track-code input{
+    border: none;
+}
