@@ -299,33 +299,9 @@ excelFileInput.addEventListener('change', (e) => {
 });
 
 
-// async function saveDataToServer() {
-//     if (packageDataArray.length > 0) {
-//         console.log('Button clicked!');
-//         const jsonData = JSON.stringify(packageDataArray);
-
-//         try {
-//             const response = await fetch('/package_data', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 body: jsonData
-//             });
-
-//             const data = await response.json();
-//             console.log(data.message); // Полученный ответ от сервера
-//         } catch (error) {
-//             console.error('Ошибка:', error);
-//         }
-//     } else {
-//         console.log('Нет данных для сохранения.');
-//     }
-// }
-
 async function saveDataToServer() {
     if (packageDataArray.length > 0) {
-        console.log('Button clicked!');
+        // console.log('Button clicked!');
         const jsonData = JSON.stringify({ data: packageDataArray }); // Оберните данные в объект
 
         try {
@@ -353,7 +329,7 @@ saveToJsonButton.addEventListener('click', saveDataToServer);
 
 async function getData() {
     try {
-        const response = await axios.get('http://localhost:5151/package_data');
+        const response = await axios.get('https://p2p-back-4e8a787f8863.herokuapp.com/package_data');
 
         if (response.status === 200) {
             const data = response.data;

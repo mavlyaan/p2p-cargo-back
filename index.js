@@ -9,14 +9,11 @@ const PORT = process.env.PORT || 5151;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
 
-// app.use(cors());
 app.use(cors({
     origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
-
-
 
 const uri = process.env.MONGODB_URI;
 
@@ -58,8 +55,6 @@ app.post('/package_data', async (req, res) => {
         res.status(500).json({ message: 'Error saving data to MongoDB', error: error.message });
     }
 });
-
-
 
 
 app.get('/package_data', async (req, res) => {
