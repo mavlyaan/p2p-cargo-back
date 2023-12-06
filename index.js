@@ -26,16 +26,19 @@ mongoose.connect(uri, {
         console.error('Error connecting to MongoDB:', error);
     });
 
-const packageSchema = new mongoose.Schema({
-    trackCode: {
-        type: String,
-        unique: true, // Гарантирует уникальность значений
-        index: true,
-    },
-    date: String,
-    deliveryDate: String,
-    status: String
-});
+    const packageSchema = new mongoose.Schema({
+        trackCode: {
+            type: String,
+            unique: true,
+            index: true,
+        },
+        date: {
+            type: String,
+            index: true, // Индекс для ускорения запросов по дате
+        },
+        deliveryDate: String,
+        status: String
+    });
 
 const Package = mongoose.model('Package', packageSchema);
 
