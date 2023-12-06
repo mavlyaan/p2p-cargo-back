@@ -42,138 +42,138 @@ mongoose.connect(uri, {
         status: String
     });
 
-// const Package = mongoose.model('Package', packageSchema);
+const Package = mongoose.model('Package', packageSchema);
 
-// app.post('/package_data', async (req, res) => {
-//     try {
-//         const newPackageData = req.body.data;
-//         // Вставка данных в базу данных
-//         const chunkSize = 100; // Размер порции данных
-//         for (let i = 0; i < newPackageData.length; i += chunkSize) {
-//             const chunk = newPackageData.slice(i, i + chunkSize);
+app.post('/package_data', async (req, res) => {
+    try {
+        const newPackageData = req.body.data;
+        // Вставка данных в базу данных
+        const chunkSize = 100; // Размер порции данных
+        for (let i = 0; i < newPackageData.length; i += chunkSize) {
+            const chunk = newPackageData.slice(i, i + chunkSize);
             
-//             try {
-//                 // Попытка вставки с обработкой дубликатов
-//                 await Package.insertMany(chunk, { ordered: false, writeConcern: { wtimeout: 0 } });
-//             } catch (error) {
-//                 // Обработка ошибки дубликата ключа
-//                 if (error.code === 11000) {
-//                     console.error('Duplicate key error. Skipping duplicates.');
-//                 } else {
-//                     throw error; // Перевыбросить другие ошибки
-//                 }
-//             }
-//         }
+            try {
+                // Попытка вставки с обработкой дубликатов
+                await Package.insertMany(chunk, { ordered: false, writeConcern: { wtimeout: 0 } });
+            } catch (error) {
+                // Обработка ошибки дубликата ключа
+                if (error.code === 11000) {
+                    console.error('Duplicate key error. Skipping duplicates.');
+                } else {
+                    throw error; // Перевыбросить другие ошибки
+                }
+            }
+        }
 
-//         console.log('Data successfully added to MongoDB');
-//         res.json({ message: 'Data successfully added' });
-//     } catch (error) {
-//         console.error('Error saving data to MongoDB:', error);
-//         res.status(500).json({ message: 'Error saving data to MongoDB', error: error.message });
-//     }
-// });
-
-
-// app.get('/package_data', async (req, res) => {
-//     try {
-//         const page = req.query.page || 1;
-//         const pageSize = 50;
-//         const filterDate = req.query.date;
-
-//         let query = {};
-
-//         if (filterDate) {
-//             // Если указана дата, добавляем условие фильтрации
-//             query.date = filterDate;
-//         }
-
-//         const data = await Package.find(query)
-//             .skip((page - 1) * pageSize)
-//             .limit(pageSize)
-//             .lean();
-
-//         res.json(data);
-//     } catch (error) {
-//         console.error('Error reading data from MongoDB:', error);
-//         res.status(500).json({ message: 'Error reading data' });
-//     }
-// });
-
-// app.get('/package_data/all', async (req, res) => {
-//     try {
-//         const filterDate = req.query.date;
-//         let query = {};
-
-//         if (filterDate) {
-//             // Если указана дата, добавляем условие фильтрации
-//             query.date = filterDate;
-//         }
-
-//         const data = await Package.find(query).lean();
-//         res.json(data);
-//     } catch (error) {
-//         console.error('Error reading all data from MongoDB:', error);
-//         res.status(500).json({ message: 'Error reading all data' });
-//     }
-// });
-
-// app.get('/package_data/pages', async (req, res) => {
-//     try {
-//         const pageSize = 10; // Размер страницы
-//         const totalCount = await Package.countDocuments();
-//         const totalPages = Math.ceil(totalCount / pageSize);
-//         res.json({ totalPages });
-//     } catch (error) {
-//         console.error('Error counting pages:', error);
-//         res.status(500).json({ message: 'Error counting pages' });
-//     }
-// });
+        console.log('Data successfully added to MongoDB');
+        res.json({ message: 'Data successfully added' });
+    } catch (error) {
+        console.error('Error saving data to MongoDB:', error);
+        res.status(500).json({ message: 'Error saving data to MongoDB', error: error.message });
+    }
+});
 
 
+app.get('/package_data', async (req, res) => {
+    try {
+        const page = req.query.page || 1;
+        const pageSize = 50;
+        const filterDate = req.query.date;
 
-// app.put('/update_status', async (req, res) => {
-//     const updatedData = req.body;
+        let query = {};
 
-//     if (!updatedData || !Array.isArray(updatedData) || updatedData.length === 0) {
-//         res.status(400).json({ message: 'Please provide valid data for update.' });
-//         return;
-//     }
+        if (filterDate) {
+            // Если указана дата, добавляем условие фильтрации
+            query.date = filterDate;
+        }
 
-//     try {
-//         const existingData = await Package.find();
+        const data = await Package.find(query)
+            .skip((page - 1) * pageSize)
+            .limit(pageSize)
+            .lean();
 
-//         updatedData.forEach((update) => {
-//             const packageToUpdate = existingData.find((package) => package.trackCode === update.trackCode);
+        res.json(data);
+    } catch (error) {
+        console.error('Error reading data from MongoDB:', error);
+        res.status(500).json({ message: 'Error reading data' });
+    }
+});
 
-//             if (packageToUpdate) {
-//                 packageToUpdate.status = update.status;
-//             }
-//         });
+app.get('/package_data/all', async (req, res) => {
+    try {
+        const filterDate = req.query.date;
+        let query = {};
 
-//         await Promise.all(existingData.map((package) => package.save()));
+        if (filterDate) {
+            // Если указана дата, добавляем условие фильтрации
+            query.date = filterDate;
+        }
 
-//         console.log('Data successfully updated in MongoDB');
-//         res.json({ message: 'Data successfully updated' });
-//     } catch (error) {
-//         console.error('Error updating data in MongoDB:', error);
-//         res.status(500).json({ message: 'Error updating data' });
-//     }
-// });
+        const data = await Package.find(query).lean();
+        res.json(data);
+    } catch (error) {
+        console.error('Error reading all data from MongoDB:', error);
+        res.status(500).json({ message: 'Error reading all data' });
+    }
+});
 
-// app.delete('/delete_package_data', async (req, res) => {
-//     const trackCodesToDelete = req.body;
+app.get('/package_data/pages', async (req, res) => {
+    try {
+        const pageSize = 10; // Размер страницы
+        const totalCount = await Package.countDocuments();
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.json({ totalPages });
+    } catch (error) {
+        console.error('Error counting pages:', error);
+        res.status(500).json({ message: 'Error counting pages' });
+    }
+});
 
-//     try {
-//         await Package.deleteMany({ trackCode: { $in: trackCodesToDelete } });
 
-//         console.log('Data successfully deleted in MongoDB');
-//         res.json({ message: 'Data successfully deleted' });
-//     } catch (error) {
-//         console.error('Error deleting data from MongoDB:', error);
-//         res.status(500).json({ message: 'Error deleting data' });
-//     }
-// });
 
-// app.listen(PORT, () => {
-//     console.log(`Server is running on port ${PORT}`);
-// });
+app.put('/update_status', async (req, res) => {
+    const updatedData = req.body;
+
+    if (!updatedData || !Array.isArray(updatedData) || updatedData.length === 0) {
+        res.status(400).json({ message: 'Please provide valid data for update.' });
+        return;
+    }
+
+    try {
+        const existingData = await Package.find();
+
+        updatedData.forEach((update) => {
+            const packageToUpdate = existingData.find((package) => package.trackCode === update.trackCode);
+
+            if (packageToUpdate) {
+                packageToUpdate.status = update.status;
+            }
+        });
+
+        await Promise.all(existingData.map((package) => package.save()));
+
+        console.log('Data successfully updated in MongoDB');
+        res.json({ message: 'Data successfully updated' });
+    } catch (error) {
+        console.error('Error updating data in MongoDB:', error);
+        res.status(500).json({ message: 'Error updating data' });
+    }
+});
+
+app.delete('/delete_package_data', async (req, res) => {
+    const trackCodesToDelete = req.body;
+
+    try {
+        await Package.deleteMany({ trackCode: { $in: trackCodesToDelete } });
+
+        console.log('Data successfully deleted in MongoDB');
+        res.json({ message: 'Data successfully deleted' });
+    } catch (error) {
+        console.error('Error deleting data from MongoDB:', error);
+        res.status(500).json({ message: 'Error deleting data' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
