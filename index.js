@@ -77,27 +77,27 @@ app.post('/package_data', async (req, res) => {
     }
 });
 
-app.post('/submit_form', async (req, res) => {
-    const { name, email, message } = req.body;
-    const telegramMessage = `New Form Submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
-    const telegramBotToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw';
-    const chatId = '-4048036574';
-    const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+// app.post('/submit_form', async (req, res) => {
+//     const { name, email, message } = req.body;
+//     const telegramMessage = `New Form Submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
+//     const telegramBotToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw';
+//     const chatId = '-4048036574';
+//     const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
 
-    await fetch(telegramApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: telegramMessage,
-        }),
-      });
+//     await fetch(telegramApiUrl, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           chat_id: chatId,
+//           text: telegramMessage,
+//         }),
+//       });
     
-      // Отправка ответа клиенту
-      res.json({ success: true });
-})
+//       // Отправка ответа клиенту
+//       res.json({ success: true });
+// })
 
 
 app.get('/package_data', async (req, res) => {
@@ -155,13 +155,13 @@ app.get('/package_data/pages', async (req, res) => {
     }
 });
 
-app.post('/submit_feedback', async(req, res) => {
-    const { name, phone, message} = req.body
-    const feedBackMessage = `
+app.post('/submit_form', async(req, res) => {
+    const { name, phone, feedBackMessage } = req.body
+    const message = `
 Новая заявка на расчет стоимости:
 Имя: ${name}
 Номер: ${phone}
-Message: ${message}
+Message: ${feedBackMessage}
     `
     try{
         const telegramResponse = await fetch (`${url}`, {
@@ -171,7 +171,7 @@ Message: ${message}
             },
             body: JSON.stringify({
                 chat_id: chatId,
-                text: feedBackMessage
+                text: message
             })
         })
         const telegramData = await telegramResponse.json();
