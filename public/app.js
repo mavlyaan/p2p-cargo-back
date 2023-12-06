@@ -1,6 +1,6 @@
-const excelFileInput = document.getElementById('excelFileInput');
-const packageList = document.getElementById('packageList');
-const saveToJsonButton = document.getElementById('saveToJsonButton');
+const excelFileInput = document.querySelector('#excelFileInput');
+const packageList = document.querySelector('#packageList');
+const saveToJsonButton = document.querySelector('#saveToJsonButton');
 const addListBtn = document.querySelector('#addList')
 const showContent = document.querySelector('#show-content');
 const addTrackCodesButton = document.querySelector('#add-track-codes')
@@ -10,15 +10,124 @@ const trackCodesContent = document.querySelector('#track-codes')
 const searchButton = document.querySelector('#searchButton')
 const selectAll = document.querySelector('#selectAll')
 const changeStatusButton = document.querySelector('#changeStatusButton');
+const loadMoreButton = document.querySelector('#loadMoreButton');
+const currentPageSpan = document.querySelector('#currentPage');
 const deleteBtn = document.querySelector('#deleteSelectedButton')
+const url = 'https://p2p-back-4e8a787f8863.herokuapp.com'
+let currentPage = 1;
+const loadAllDataButton = document.querySelector('#loadAllDataButton');
+const scrollToTopButton = document.getElementById('scrollToTopButton');
 
-changeStatusButton.addEventListener('click', changeStatusForSelectedTrackCodes);
+getData()
+// Функция, которая показывает или скрывает кнопку "наверх" в зависимости от положения прокрутки
+function handleScroll() {
+    const scrollY = window.scrollY;
+
+    if (scrollY > 200) {
+        scrollToTopButton.style.display = 'block';
+    } else {
+        scrollToTopButton.style.display = 'none';
+    }
+}
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+// Добавление обработчика событий для прокрутки
+window.addEventListener('scroll', handleScroll);
+// Добавление обработчика событий для кнопки "наверх"
+scrollToTopButton.addEventListener('click', scrollToTop);
+
+async function fetchAllDataForDate(filterDate) {
+    try {
+        const response = await axios.get(`${url}/package_data/all`, {
+            params: {
+                date: filterDate,
+            },
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching all data:', error);
+        return [];
+    }
+}
+changeStatusButton.addEventListener('click', changeStatusForSelectedTrackCodes) 
+
+loadAllDataButton.addEventListener('click', async () => {
+    const searchDate = document.querySelector('#searchDate').value;
+    const formattedSearchDate = convertDateFormat(searchDate);
+
+    try {
+        const allData = await fetchAllDataForDate(formattedSearchDate);
+
+        if (allData.length > 0) {
+            // Очищаем текущие данные перед загрузкой новых
+            trackCodesContent.innerHTML = '';
+            // Отображаем все данные
+            allData.forEach((package) => render(package, true));
+            // Добавляем уведомление, что все данные успешно загружены
+            alert('Все данные успешно загружены!');
+        } else {
+            alert('Нет данных для выбранной даты.');
+        }
+    } catch (error) {
+        console.error('Error loading all data:', error);
+    }
+});
+
+loadMoreButton.addEventListener('click', async () => {
+    const searchDate = document.querySelector('#searchDate').value;
+    const formattedSearchDate = convertDateFormat(searchDate);
+
+    try {
+        const newData = await fetchDataForPage(currentPage, formattedSearchDate);
+        if (newData.length > 0) {
+            // Добавить новые данные к существующему списку
+            packageDataArray = packageDataArray.concat(newData);
+            newData.forEach((package) => render(package));
+            currentPage++;
+        } else {
+            // Если нет новых данных, скрыть кнопку "Загрузить еще" или добавить соответствующий код
+            loadMoreButton.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading more data:', error);
+    }
+});
+
+async function fetchDataForPage(page, filterDate, loadAll) {
+    try {
+        const response = await axios.get(`${url}/package_data?page=${page}`, {
+            params: {
+                date: filterDate,
+                loadAll: loadAll, // Добавьте параметр загрузки всех данных
+            },
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return [];
+    }
+}
 
 async function changeStatusForSelectedTrackCodes() {
     const selectedTrackCodeDivs = document.querySelectorAll('.track-code.selected');
 
     if (selectedTrackCodeDivs.length === 0) {
-        console.log('Пожалуйста, выберите хотя бы один элемент для изменения статуса.');
+        alert('Пожалуйста, выберите хотя бы один элемент для изменения статуса.');
         return;
     }
 
@@ -33,7 +142,7 @@ async function changeStatusForSelectedTrackCodes() {
     });
 
     try {
-        const response = await fetch('/package_data', {
+        const response = await fetch('/update_status', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -43,12 +152,12 @@ async function changeStatusForSelectedTrackCodes() {
 
         if (response.ok) {
             const result = await response.json();
-            console.log(result.message);
+            alert(result.message);
         } else {
-            console.error('Произошла ошибка при отправке данных на сервер');
+            alert('Произошла ошибка при отправке данных на сервер');
         }
     } catch (error) {
-        console.error('Ошибка:', error);
+        alert('Ошибка:', error);
     }
 
     // Опционально: Снимите выделение с выбранных трек-кодов
@@ -57,24 +166,15 @@ async function changeStatusForSelectedTrackCodes() {
         const selectCheckbox = div.querySelector('.select-checkbox');
         selectCheckbox.checked = false;
     });
-
-    setTimeout(() => {
-        location.reload();
-    }, 500);
 }
+
 async function deleteSelectedTrackCodes() {
     const selectedTrackCodeDivs = document.querySelectorAll('.track-code.selected');
-
-    if (selectedTrackCodeDivs.length === 0) {
-        console.log('Пожалуйста, выберите хотя бы один элемент для удаления.');
-        return;
-    }
-
-    const trackCodesToDelete = Array.from(selectedTrackCodeDivs).map((div) => {
-        return div.id;
-    });
+    const trackCodesToDelete = Array.from(selectedTrackCodeDivs).map(div => div.id);
 
     try {
+        // Удалите трек-коды на сервере
+
         const response = await fetch('/delete_package_data', {
             method: 'DELETE',
             headers: {
@@ -84,67 +184,118 @@ async function deleteSelectedTrackCodes() {
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log(result.message);
+            // Удалите трек-коды из packageDataArray (данных, хранящихся на клиентской стороне)
+            packageDataArray = packageDataArray.filter(pkg => !trackCodesToDelete.includes(pkg.trackCode));
+
+            // Удалите соответствующие DOM-элементы
+            trackCodesToDelete.forEach(trackCode => {
+                const elementToRemove = document.getElementById(trackCode);
+                if (elementToRemove) {
+                    elementToRemove.remove();
+                }
+            });
+
+            alert('Успешно удалено.');
         } else {
-            console.error('Произошла ошибка при отправке данных на сервер');
+            alert('Произошла ошибка при удалении данных на сервере');
         }
     } catch (error) {
-        console.error('Ошибка:', error);
+        alert('Ошибка:', error);
     }
-
-    // Удалите трек-коды из packageDataArray (данных, хранящихся на клиентской стороне)
-    packageDataArray = packageDataArray.filter((package) => !trackCodesToDelete.includes(package.trackCode));
-
-    // Удалите соответствующие DOM-элементы
-    trackCodesToDelete.forEach((trackCode) => {
-        const elementToRemove = document.getElementById(trackCode);
-        elementToRemove.remove();
-    });
-
-    // Снимите выделение с выбранных трек-кодов
-    selectedTrackCodeDivs.forEach((div) => {
-        div.classList.remove('selected');
-        const selectCheckbox = div.querySelector('.select-checkbox');
-        selectCheckbox.checked = false;
-    });
 }
+
 
 deleteBtn.addEventListener('click', deleteSelectedTrackCodes)
-searchButton.addEventListener('click', filterTrackCodesByDate)
-selectAll.addEventListener('click', selectAllTrackCodes);
+searchButton.addEventListener('click', async () => {
+    const searchDate = document.querySelector('#searchDate').value;
+    const formattedSearchDate = convertDateFormat(searchDate);
 
+    try {
+        // Очищаем содержимое перед загрузкой новых данных
+        trackCodesContent.innerHTML = '';
+
+        // Сбрасываем текущую страницу на 1 перед загрузкой данных
+        currentPage = 1;
+
+        // Загружаем данные для первой страницы с учетом фильтра
+        const newData = await fetchDataForPage(currentPage, formattedSearchDate);
+        if (newData.length > 0) {
+            // Добавляем данные к существующему списку
+            packageDataArray = newData;
+            newData.forEach((package) => render(package));
+            currentPage++;
+        } else {
+            // Если нет данных, скрываем кнопку "Загрузить еще"
+            loadMoreButton.style.display = 'none';
+        }
+    } catch (error) {
+        alert('Error searching data:', error);
+    }
+});
+
+selectAll.addEventListener('click', selectAllTrackCodes);
+// selectAllTrackCodes
 function selectAllTrackCodes() {
     const trackCodeCheckboxes = document.querySelectorAll('input[type="checkbox"][name="trackCode"]');
+    
     trackCodeCheckboxes.forEach(checkbox => {
         checkbox.checked = true;
-        addSelectClass(checkbox)
+        addSelectClass(checkbox);
     });
-    
+
+    // Обновите выделение в данных
+    packageDataArray.forEach(package => (package.selected = true));
 }
 
-function addSelectClass(checkbox){
+function addSelectClass(checkbox) {
     const trackCodeDiv = checkbox.closest('.track-code');
-            console.log(trackCodeDiv);
+
+    if (checkbox.checked) {
+        // Если чекбокс отмечен, добавьте класс "selected" для родительского div
+        trackCodeDiv.classList.add('selected');
+    } else {
+        // Если чекбокс не отмечен, удалите класс "selected" для родительского div
+        trackCodeDiv.classList.remove('selected');
+    }
     
-            if (checkbox.checked) {
-                // Если чекбокс отмечен, добавьте класс "selected" для родительского div
-                trackCodeDiv.classList.add('selected');
-            } else {
-                // Если чекбокс не отмечен, удалите класс "selected" для родительского div
-                trackCodeDiv.classList.remove('selected');
-            }
+    // Обновите выделение в данных
+    const trackCode = trackCodeDiv.id;
+    const package = packageDataArray.find(pkg => pkg.trackCode === trackCode);
+    if (package) {
+        package.selected = checkbox.checked;
+    }
 }
 
+async function fetchDataForPage(page, filterDate) {
+    try {
+        const response = await axios.get(`${url}/package_data?page=${page}`, {
+            params: {
+                date: filterDate,
+            },
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return [];
+    }
+}
 
 function convertDateFormat(inputDate) {
-    if (!inputDate) return '';
-    const parts = inputDate.split('-');
-    if (parts.length === 3) {
-        const [year, month, day] = parts;
-        return `${day}.${month}.${year}`;
+    if (typeof inputDate === 'string') {
+        const parts = inputDate.split('-');
+        if (parts.length === 3) {
+            const [year, month, day] = parts;
+            const utcDate = new Date(Date.UTC(year, month - 1, day));
+            const formattedDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+            return `${day}.${month}.${year}`;
+        }
     }
-    return inputDate; // Вернуть исходную дату, если она не может быть преобразована
+    return inputDate;
 }
 
 function filterTrackCodesByDate() {
@@ -155,41 +306,41 @@ function filterTrackCodesByDate() {
     // Преобразуйте формат даты из "yyyy-mm-dd" в "dd.mm.yyyy"
     const formattedSearchDate = convertDateFormat(searchDate);
 
-    // Очистите <div id="track-codes"> перед отображением отфильтрованных трек-кодов
     try {
         if (formattedSearchDate === '') throw 'Введите корректную дату';
-        const trackCodesDiv = document.querySelector('#track-codes');
-        trackCodesDiv.innerHTML = '';
 
-        // Фильтруйте трек-коды по введенной дате и отображайте их
-        packageDataArray.forEach((package) => {
-            if (package.date === formattedSearchDate) {
-                render(package, true); // Передайте true, чтобы отметить элементы для выбора
-            }
+        // Отфильтруйте данные по выбранной дате
+        const filteredData = packageDataArray.filter((package) => package.date === formattedSearchDate);
+
+        // Очистите содержимое перед отображением отфильтрованных трек-кодов
+        trackCodesContent.innerHTML = '';
+
+        // Отобразите отфильтрованные данные
+        filteredData.forEach((package) => {
+            render(package, true);
         });
     } catch (error) {
         errorMessage.innerHTML = error;
     }
-    const selectCheckboxes = document.querySelectorAll('.select-checkbox')
-    selectCheckboxes.forEach(checkbox => {
+}
+
+const selectCheckboxes = document.querySelectorAll('.select-checkbox')
+selectCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             addSelectClass(checkbox)
         });
     });
 
-}
-
-
-function render(trackCodes){
+function render(trackCodes) {
     trackCodesContent.innerHTML += `
         <div class="track-code" id="${trackCodes.trackCode}">
-        <input value="${trackCodes.trackCode}" readonly>
-        <input value="${trackCodes.date}" readonly>
-        <input value="${trackCodes.deliveryDate}" readonly>
-        <input value="${trackCodes.status}" name="status" class="status-input">
-        <input type="checkbox" name="trackCode" class="select-checkbox">
+            <input value="${trackCodes.trackCode}" readonly>
+            <input value="${trackCodes.date}" readonly>
+            <input value="${trackCodes.deliveryDate}" readonly>
+            <input value="${trackCodes.status}" name="status" class="status-input">
+            <input type="checkbox" name="trackCode" class="select-checkbox">
         </div>
-    `
+    `;
 }
 
 addTrackCodesButton.addEventListener('click', () => {
@@ -211,7 +362,6 @@ showTrackCodesButton.addEventListener('click', () => {
     addContent.classList.remove('show')  
     packageDataArray = [];
     getData()
-    
 })
 
 let packageDataArray = [];
@@ -261,11 +411,12 @@ excelFileInput.addEventListener('change', (e) => {
 
                 const packageObject = {
                     'id': id++,
-                    'trackCode': trackCode.toString(),
+                    'trackCode': trackCode ? trackCode.toString() : '',
                     'date': date,
                     'deliveryDate': deliveryDate.toLocaleDateString(),
                     'status': status,
                 };
+                
 
                 packageDataArray.push(packageObject);
 
@@ -298,10 +449,8 @@ excelFileInput.addEventListener('change', (e) => {
     }
 });
 
-
 async function saveDataToServer() {
     if (packageDataArray.length > 0) {
-        // console.log('Button clicked!');
         const jsonData = JSON.stringify({ data: packageDataArray }); // Оберните данные в объект
 
         try {
@@ -314,22 +463,20 @@ async function saveDataToServer() {
             });
 
             const data = await response.json();
-            console.log(data.message); // Полученный ответ от сервера
+            alert(data.message); // Полученный ответ от сервера
         } catch (error) {
             console.error('Ошибка:', error);
         }
     } else {
-        console.log('Нет данных для сохранения.');
+        alert('Нет данных для сохранения.');
     }
 }
 
-
 saveToJsonButton.addEventListener('click', saveDataToServer);
-
 
 async function getData() {
     try {
-        const response = await axios.get('https://p2p-back-4e8a787f8863.herokuapp.com/package_data');
+        const response = await axios.get(`${url}/package_data`);
 
         if (response.status === 200) {
             const data = response.data;
@@ -346,8 +493,11 @@ async function getData() {
                     addSelectClass(checkbox)
                 });
             });
+
+            // Добавим уведомление, что данные успешно загружены
+            // alert('Все данные успешно загружены!');
         }
     } catch (error) {
-        console.error('Ошибка получения данных:', error);
+        alert('Ошибка получения данных:', error);
     }
 }

@@ -5,10 +5,8 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5151;
 
-
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
-
 app.use(cors({
     origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -18,7 +16,6 @@ app.use(cors({
 const uri = process.env.MONGODB_URI;
 
 mongoose.connect(uri, { 
-    
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 })
@@ -45,11 +42,26 @@ const Package = mongoose.model('Package', packageSchema);
 app.post('/package_data', async (req, res) => {
     try {
         const newPackageData = req.body.data;
-        console.log('Received data on the server:', newPackageData);
+        // Вставка данных в базу данных
+        const chunkSize = 100; // Размер порции данных
+        for (let i = 0; i < newPackageData.length; i += chunkSize) {
+            const chunk = newPackageData.slice(i, i + chunkSize);
+            
+            try {
+                // Попытка вставки с обработкой дубликатов
+                await Package.insertMany(chunk, { ordered: false, writeConcern: { wtimeout: 0 } });
+            } catch (error) {
+                // Обработка ошибки дубликата ключа
+                if (error.code === 11000) {
+                    console.error('Duplicate key error. Skipping duplicates.');
+                } else {
+                    throw error; // Перевыбросить другие ошибки
+                }
+            }
+        }
 
-        const savedPackages = await Package.insertMany(newPackageData);
         console.log('Data successfully added to MongoDB');
-        res.json({ message: 'Data successfully added', savedPackages });
+        res.json({ message: 'Data successfully added' });
     } catch (error) {
         console.error('Error saving data to MongoDB:', error);
         res.status(500).json({ message: 'Error saving data to MongoDB', error: error.message });
@@ -59,7 +71,22 @@ app.post('/package_data', async (req, res) => {
 
 app.get('/package_data', async (req, res) => {
     try {
-        const data = await Package.find().lean();
+        const page = req.query.page || 1;
+        const pageSize = 50;
+        const filterDate = req.query.date;
+
+        let query = {};
+
+        if (filterDate) {
+            // Если указана дата, добавляем условие фильтрации
+            query.date = filterDate;
+        }
+
+        const data = await Package.find(query)
+            .skip((page - 1) * pageSize)
+            .limit(pageSize)
+            .lean();
+
         res.json(data);
     } catch (error) {
         console.error('Error reading data from MongoDB:', error);
@@ -67,7 +94,39 @@ app.get('/package_data', async (req, res) => {
     }
 });
 
-app.put('/package_data', async (req, res) => {
+app.get('/package_data/all', async (req, res) => {
+    try {
+        const filterDate = req.query.date;
+        let query = {};
+
+        if (filterDate) {
+            // Если указана дата, добавляем условие фильтрации
+            query.date = filterDate;
+        }
+
+        const data = await Package.find(query).lean();
+        res.json(data);
+    } catch (error) {
+        console.error('Error reading all data from MongoDB:', error);
+        res.status(500).json({ message: 'Error reading all data' });
+    }
+});
+
+app.get('/package_data/pages', async (req, res) => {
+    try {
+        const pageSize = 10; // Размер страницы
+        const totalCount = await Package.countDocuments();
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.json({ totalPages });
+    } catch (error) {
+        console.error('Error counting pages:', error);
+        res.status(500).json({ message: 'Error counting pages' });
+    }
+});
+
+
+
+app.put('/update_status', async (req, res) => {
     const updatedData = req.body;
 
     if (!updatedData || !Array.isArray(updatedData) || updatedData.length === 0) {
