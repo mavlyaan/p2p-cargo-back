@@ -18,7 +18,7 @@ let currentPage = 1;
 const loadAllDataButton = document.querySelector('#loadAllDataButton');
 const scrollToTopButton = document.getElementById('scrollToTopButton');
 
-// getData()
+getData()
 // Функция, которая показывает или скрывает кнопку "наверх" в зависимости от положения прокрутки
 function handleScroll() {
     const scrollY = window.scrollY;
