@@ -44,10 +44,10 @@ mongoose.connect(uri, {
     serverSelectionTimeoutMS: 5000
 })
     .then(() => {
-        console.log('Connected to MongoDB');
+        alert('Connected to MongoDB');
     })
     .catch((error) => {
-        console.error('Error connecting to MongoDB:', error);
+        alert('Error connecting to MongoDB:', error);
     });
 
     const packageSchema = new mongoose.Schema({
