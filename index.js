@@ -158,10 +158,10 @@ app.get('/package_data/pages', async (req, res) => {
 app.post('/submit_form', async(req, res) => {
     const { name, phone, feedBackMessage } = req.body
     const message = `
-Новая заявка на расчет стоимости:
+Новая заявка:
 Имя: ${name}
 Номер: ${phone}
-Message: ${feedBackMessage}
+Сообщение: ${feedBackMessage}
     `
     try{
         const telegramResponse = await fetch (`${url}`, {
