@@ -4,12 +4,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5151;
+const botToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw'
+const chatId = '-4048036574'
+const url = `https://api.telegram.org/bot${botToken}/sendMessage`
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
 app.use(cors({
     origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
+    // origin: 'http://localhost:4200',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
@@ -73,6 +77,28 @@ app.post('/package_data', async (req, res) => {
     }
 });
 
+app.post('/submit_form', async (req, res) => {
+    const { name, email, message } = req.body;
+    const telegramMessage = `New Form Submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
+    const telegramBotToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw';
+    const chatId = '-4048036574';
+    const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+
+    await fetch(telegramApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: telegramMessage,
+        }),
+      });
+    
+      // Отправка ответа клиенту
+      res.json({ success: true });
+})
+
 
 app.get('/package_data', async (req, res) => {
     try {
@@ -129,7 +155,35 @@ app.get('/package_data/pages', async (req, res) => {
     }
 });
 
+app.post('/submit_feedback', async(req, res) => {
+    const { name, phone, message} = req.body
+    const feedBackMessage = `
+Новая заявка на расчет стоимости:
+Имя: ${name}
+Номер: ${phone}
+Message: ${message}
+    `
+    try{
+        const telegramResponse = await fetch (`${url}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: feedBackMessage
+            })
+        })
+        const telegramData = await telegramResponse.json();
+        if (!telegramData.ok) {
+            throw new Error('Ошибка при отправке в Telegram');
+          }
+          res.json({ success: true, message: 'Заявка успешно отправлена' });
 
+    } catch(error){
+        console.log(error);
+    }
+})
 
 app.put('/update_status', async (req, res) => {
     const updatedData = req.body;
