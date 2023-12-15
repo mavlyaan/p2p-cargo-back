@@ -1,48 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <title>Отображение данных о посылке</title>
-</head>
-<body>
+  </head>
+  <body>
     <div class="buttons">
-        <button id="add-track-codes" class="active">Add</button>
-        <button id="show-track-codes">Show</button>
+      <button id="add-track-codes" class="active">Добавить трек кода</button>
+      <button id="show-track-codes">Показать трек кода</button>
     </div>
     <div id="add-content" class="add-content show">
-        <input type="file" id="excelFileInput" accept=".xlsx">
-        <button id="saveToJsonButton">Сохранить в JSON</button>
-        <div id="packageList"></div>
+      <input type="file" id="excelFileInput" accept=".xlsx" />
+      <button class="button" id="saveToJsonButton">
+        Сохранить в Базу Данных
+      </button>
+      <div id="packageList"></div>
     </div>
     <div id="show-content" class="hide show-content">
-        <div id="filter">
+      <div id="filter">
+        <div class="searchContent">
+          <div class="searchBtn">
+            <input class="button" type="date" id="searchDate" />
+            <button class="button" id="searchButton">Найти</button>
+          </div>
+          <p id="date-error"></p>
+        </div>
+        <div class="edit">
+          <button class="button" id="selectAll">Выделить все</button>
+          <div class="changeStatusContent">
             <div>
-                <input type="date" id="searchDate">
-                <button id="searchButton">Найти</button>
-                <p id="date-error"></p>
+              <!-- <input
+                class="button"
+                type="text"
+                id="newStatusInput"
+                placeholder="Введите статус"
+              /> -->
+              <select name="status" id="newStatusInput" class="button">
+                <option value="Прибыл">Прибыл</option>
+                <option value="На Сортировке">На Сортировке</option>
+                <option value="Готов к выдаче">Готов к выдаче</option>
+                <option value="Выдан">Выдан</option>
+              </select>
+              <button class="button" id="changeStatusButton">
+                Изменить статус
+              </button>
             </div>
-            <div class="edit">
-                <button id="selectAll">Выделить все</button>
-                <div>
-                    <input type="text" id="newStatusInput">
-                <button id="changeStatusButton">Change Status</button>
-                <button id="deleteSelectedButton">Удалить выбранные</button>
-                </div>
-            </div>
+            <button class="button" id="deleteSelectedButton">
+              Удалить выбранные
+            </button>
+          </div>
         </div>
-            <div id="track-codes"></div>
-            <div id="pagination">
-                <button id="loadMoreButton">Load More...</button>
-                <button id="loadAllDataButton">Загрузить все</button>
-            </div>
-
-            <button id="scrollToTopButton" style="display:none;">Наверх</button>
-
-        </div>
+      </div>
+      <div id="track-codes"></div>
+      <div id="pagination">
+        <button class="button" id="loadMoreButton">Показать еще</button>
+        <button class="button" id="loadAllDataButton">Загрузить все</button>
+      </div>
+      <button id="scrollToTopButton">Наверх</button>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.4/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="app.js"></script>
-</body>
+  </body>
 </html>

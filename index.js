@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5151;
-const botToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw'
-const chatId = '-4048036574'
+const botToken = process.env.botToken
+const chatId = process.env.chatId
 const url = `https://api.telegram.org/bot${botToken}/sendMessage`
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
@@ -76,29 +76,6 @@ app.post('/package_data', async (req, res) => {
         res.status(500).json({ message: 'Error saving data to MongoDB', error: error.message });
     }
 });
-
-// app.post('/submit_form', async (req, res) => {
-//     const { name, email, message } = req.body;
-//     const telegramMessage = `New Form Submission:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
-//     const telegramBotToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw';
-//     const chatId = '-4048036574';
-//     const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
-
-//     await fetch(telegramApiUrl, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           chat_id: chatId,
-//           text: telegramMessage,
-//         }),
-//       });
-    
-//       // Отправка ответа клиенту
-//       res.json({ success: true });
-// })
-
 
 app.get('/package_data', async (req, res) => {
     try {
