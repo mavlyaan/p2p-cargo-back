@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 5151;
 const botToken = process.env.botToken
 const chatId = process.env.chatId
-const url = `https://api.telegram.org/bot${botToken}/sendMessage`
+const url = process.env.MONGODB_URI
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(express.json({ limit: '50mb' }));
