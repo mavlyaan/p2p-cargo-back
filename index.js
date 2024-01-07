@@ -18,8 +18,7 @@ app.use(cors({
 }));
 
 
-// const uri = process.env.MONGODB_URI;
-const uri = 'mongodb+srv://mavlyaan:Heliang3477@cluster0.dnblmkj.mongodb.net/test?retryWrites=true&w=majority'
+const uri = process.env.MONGODB_URI;
 console.log('connect to mongoDB...');
 mongoose.connect(uri, { 
     useNewUrlParser: true, 
