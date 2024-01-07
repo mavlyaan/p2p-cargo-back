@@ -12,7 +12,8 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
 app.use(cors({
-    origin: process.env.cors,
+    // origin: process.env.cors,
+    origin: 'https://p2p-cargo.kz',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
