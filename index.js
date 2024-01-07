@@ -11,19 +11,13 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
-// app.use(cors({
-//     // origin: process.env.cors,
-//     origin: 'https://p2p-cargo.kz',
-//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//     credentials: true,
-// }));
+app.use(cors({
+    origin: process.env.cors,
+    // origin: 'https://p2p-cargo.kz',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+}));
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://p2p-cargo.kz');
-    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-  });
 
 
 const uri = process.env.MONGODB_URI;
