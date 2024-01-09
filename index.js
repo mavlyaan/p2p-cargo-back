@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 5151;
 const botToken = process.env.botToken
 const chatId = process.env.chatId
 const url = process.env.MONGODB_URI
+const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(express.json({ limit: '50mb' }));
@@ -145,7 +146,7 @@ app.post('/submit_form', async(req, res) => {
 Сообщение: ${feedBackMessage}
     `
     try{
-        const telegramResponse = await fetch (`${botToken}/sendMessage`, {
+        const telegramResponse = await fetch (`${telegramUrl}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
