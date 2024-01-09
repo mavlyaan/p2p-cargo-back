@@ -4,8 +4,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5151;
-const botToken = process.env.botToken
-const chatId = process.env.chatId
+// const botToken = process.env.botToken
+const botToken = '6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw'
+// const chatId = process.env.chatId
+const chatId = '-4011710662'
 const url = process.env.MONGODB_URI
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
