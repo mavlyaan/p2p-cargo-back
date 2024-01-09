@@ -145,7 +145,7 @@ app.post('/submit_form', async(req, res) => {
 Сообщение: ${feedBackMessage}
     `
     try{
-        const telegramResponse = await fetch (`${botToken}`, {
+        const telegramResponse = await fetch (`${botToken}/sendMessage`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
