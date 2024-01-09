@@ -14,7 +14,6 @@ const loadMoreButton = document.querySelector("#loadMoreButton");
 const currentPageSpan = document.querySelector("#currentPage");
 const deleteBtn = document.querySelector("#deleteSelectedButton");
 const url = 'https://p2p-back-4e8a787f8863.herokuapp.com'
-// const url = "http://localhost:5151";
 let currentPage = 1;
 const loadAllDataButton = document.querySelector("#loadAllDataButton");
 const scrollToTopButton = document.getElementById("scrollToTopButton");

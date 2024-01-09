@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 5151;
 const botToken = process.env.botToken
 // const chatId = process.env.chatId
-const chatId = '-4011710662'
+const chatId = '-4048036574'
 const url = process.env.MONGODB_URI
 const telegramUrl = `https://api.telegram.org/bot6919234850:AAGheulm8qoO-8yHp7Bs4c51Pp7DAC3KGVw/sendMessage`
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -14,13 +14,10 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
 app.use(cors({
-    // origin: process.env.cors,
-    // origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
     origin: 'https://p2p-cargo.kz',
-    // origin: 'http://localhost:4200',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],  // Добавьте эту строку
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
 }));
 
 
