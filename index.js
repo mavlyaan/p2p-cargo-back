@@ -13,9 +13,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname + "/public"));
 app.use(cors({
     // origin: process.env.cors,
-    origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
+    // origin: 'https://p2p-cargo-7ab22fcf62bb.herokuapp.com',
+    origin: 'https://p2p-cargo.kz',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],  // Добавьте эту строку
 }));
 
 
